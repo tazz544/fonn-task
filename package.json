@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "start": "ts-node-dev --respawn --transpile-only ./src/app.ts --trace-warnings",
     "test": "jest",
     "build": "tsc",
     "format": "prettier --config .prettierrc \"src/**/*.ts\" --write",
