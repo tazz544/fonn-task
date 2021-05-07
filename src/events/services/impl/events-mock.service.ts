@@ -21,18 +21,73 @@ export class EventsMockService implements EventsService {
     return existingEvent;
   }
 
-  getEvents(
+  /**
+   * Gets events
+   * @param dateFrom
+   * @param dateTo
+   * @param offset
+   * @param limit
+   */
+  async getEvents(
     dateFrom: string,
     dateTo: string,
     offset: number,
     limit: number,
   ): Promise<{ totalCount: number; events: Event[] }> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+    if (!EventsMockService.validateDateRange(dateFrom, dateTo)) {
+      throw new Error('Date range is not valid');
+    }
+    const totalResults = this._events.filter((event) =>
+      EventsMockService.isEventIsInDateRange(dateFrom, dateTo, event),
+    );
+    return {
+      totalCount: totalResults.length,
+      events: totalResults.slice(offset, limit + offset),
+    };
   }
 
-  removeEvent(id: string): Promise<void> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+  /**
+   * Removes event
+   * @param id
+   */
+  async removeEvent(id: string): Promise<void> {
+    // Prettier but slower (~0.2ms):
+    // this._events = this._events.filter((x) => x.id !== id);
+
+    // Faster one (~0.16ms):
+    const existingEventIndex = this._events.findIndex((x) => x.id === id);
+    if (existingEventIndex > -1) {
+      this._events.splice(existingEventIndex, 1);
+    }
+  }
+
+  /**
+   * Checks if date range is valid
+   * @param dateFrom
+   * @param dateTo
+   * @private
+   */
+  private static validateDateRange(dateFrom: string, dateTo: string): boolean {
+    const conditions = [
+      !isNaN(Date.parse(dateFrom)),
+      !isNaN(Date.parse(dateTo)),
+      Date.parse(dateFrom) <= Date.parse(dateTo),
+    ];
+    return conditions.every((x) => !!x);
+  }
+
+  /**
+   * Checks if event is in date range
+   * @param dateFrom
+   * @param dateTo
+   * @param event
+   * @private
+   */
+  private static isEventIsInDateRange(dateFrom: string, dateTo: string, event: Event): boolean {
+    const conditions = [
+      Date.parse(dateFrom) <= Date.parse(event.startDate),
+      Date.parse(dateTo) >= Date.parse(event.endDate),
+    ];
+    return conditions.every((x) => !!x);
   }
 }
