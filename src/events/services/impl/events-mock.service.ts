@@ -9,9 +9,16 @@ export class EventsMockService implements EventsService {
     return Promise.resolve({}); // todo: implement method
   }
 
-  getEvent(id: string): Promise<Event> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+  /**
+   * Gets event
+   * @param id
+   */
+  async getEvent(id: string): Promise<Event> {
+    const existingEvent = this._events.find((x) => x.id === id);
+    if (!existingEvent) {
+      throw new Error('Event with ID does not exist');
+    }
+    return existingEvent;
   }
 
   getEvents(
