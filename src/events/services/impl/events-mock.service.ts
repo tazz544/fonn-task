@@ -1,12 +1,36 @@
 import { EventsService } from '../events.service';
 import { Event } from '../../models/event';
+import { v4 as uuid } from 'uuid';
 
 export class EventsMockService implements EventsService {
   constructor(private _events: Event[]) {}
 
-  createEvent(dateFrom: string, dateTo: string, title: string): Promise<Event> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+  /**
+   * Creates event
+   * @param dateFrom
+   * @param dateTo
+   * @param title
+   */
+  async createEvent(dateFrom: string, dateTo: string, title: string): Promise<Event> {
+    if (!EventsMockService.validateDateRange(dateFrom, dateTo)) {
+      throw new Error('Date range is not valid');
+    }
+    const eventInProvidedDateRange = this._events.find(
+      (event) =>
+        EventsMockService.isEventIsInDateRange(dateFrom, dateTo, event) &&
+        Date.parse(dateFrom) !== Date.parse(event.endDate),
+    );
+    if (eventInProvidedDateRange) {
+      throw new Error('Events conflict');
+    }
+    const newEvent: Event = {
+      id: uuid(),
+      title,
+      startDate: dateFrom,
+      endDate: dateTo,
+    };
+    this._events.push(newEvent);
+    return newEvent;
   }
 
   /**
